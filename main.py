@@ -88,4 +88,7 @@ if __name__ == '__main__':
         metrics=['accuracy']
     )
 
-    _ = model.fit(x_train, y_train, validation_data=(x_valid, y_valid), epochs=100, batch_size=32)
+    augment = keras.preprocessing.image.ImageDataGenerator()
+
+    _ = model.fit_generator(augment.flow(x_train, y_train, 256),
+                            validation_data=(x_valid, y_valid), epochs=100)
