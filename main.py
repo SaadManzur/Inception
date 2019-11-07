@@ -65,10 +65,12 @@ def get_cifar10_dataset(width, height):
 
     y_train = keras.utils.to_categorical(y_train, 10)
     y_valid = keras.utils.to_categorical(y_valid, 10)
-
+    
+    print("Changing types")
     x_train = x_train.astype('float32')
     x_valid = x_valid.astype('float32')
 
+    print("Scaling")
     x_train /= 255.0
     x_valid /= 255.0
 
@@ -86,4 +88,4 @@ if __name__ == '__main__':
         metrics=['accuracy']
     )
 
-    _ = model.fit(x_train, y_train, validation_data=(x_valid, y_valid), epochs=100, batch_size=256)
+    _ = model.fit(x_train, y_train, validation_data=(x_valid, y_valid), epochs=100, batch_size=32)
