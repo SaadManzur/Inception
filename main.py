@@ -1,3 +1,7 @@
+import os
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID" 
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+
 from tensorflow import keras
 import numpy as np
 import cv2 as opencv
@@ -66,14 +70,14 @@ def GoogLeNet():
     inception8 = get_inception_block(pool4, 256, 160, 320, 32, 128, 128, 'inception_5a')
     inception9 = get_inception_block(inception8, 384, 192, 384, 48, 128, 128, 'inception_5b')
 
-    avg1 = keras.layers.AvgPool2D((7, 7), strides=(1, 1))(inception9)
+    avg1 = keras.layers.GlobalAveragePooling2D()(inception9)
     dropout1 = keras.layers.Dropout(0.4)(avg1)
 
     flatten = keras.layers.Flatten()(dropout1)
     fc1 = keras.layers.Dense(1000, activation='relu')(flatten)
-    logit = keras.layers.Dense(10, activation='softmax')(fc1)
+    logit = keras.layers.Dense(10, activation='softmax', name='output')(fc1)
 
-    model = keras.Model(inputs=inputs, outputs=logit)
+    model = keras.Model(inputs=inputs, outputs=[logit, auxilary1, auxilary2])
 
     return model
 
@@ -86,7 +90,12 @@ def get_cifar10_dataset(width, height):
 
     y_train = keras.utils.to_categorical(y_train, 10)
     y_valid = keras.utils.to_categorical(y_valid, 10)
-    
+
+    y_train = np.stack((y_train, y_train, y_train), axis=2)
+    y_valid = np.stack((y_valid, y_valid, y_valid), axis=2)
+
+    print(y_train.shape)
+   
     print("Changing types")
     x_train = x_train.astype('float32')
     x_valid = x_valid.astype('float32')
@@ -104,7 +113,7 @@ def train_with_cifar10():
     model = GoogLeNet()
 
     model.compile(
-        loss=['categorical_crossentropy'],
+        loss=['categorical_crossentropy', 'categorical_crossentropy', 'categorical_crossentropy'],
         optimizer=keras.optimizers.SGD(lr=0.01, momentum=0.9, nesterov=False),
         loss_weights=[1.0, 0.3, 0.3],
         metrics=['accuracy']
@@ -117,5 +126,4 @@ def train_with_cifar10():
 
 
 if __name__ == '__main__':
-    model = GoogLeNet()
-    print(model.summary())
+    train_with_cifar10()
