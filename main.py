@@ -91,9 +91,6 @@ def get_cifar10_dataset(width, height):
     y_train = keras.utils.to_categorical(y_train, 10)
     y_valid = keras.utils.to_categorical(y_valid, 10)
 
-    y_train = np.stack((y_train, y_train, y_train), axis=2)
-    y_valid = np.stack((y_valid, y_valid, y_valid), axis=2)
-
     print(y_train.shape)
    
     print("Changing types")
@@ -105,6 +102,18 @@ def get_cifar10_dataset(width, height):
     x_valid /= 255.0
 
     return x_train, y_train, x_valid, y_valid
+
+
+def multiple_outputs_generator(generator, x, y, batch_size=256):
+
+    generator_x = generator.flow(x, batch_size=batch_size)
+    generator_y = generator.flow(y, batch_size=batch_size)
+
+    while True:
+        x_i = generator_x.next()
+        y_i = generator_y.next()
+
+        yield x_i, {'output_1': y_i, 'output_2': y_i, 'output_3': y_i}
 
 
 def train_with_cifar10():
@@ -119,10 +128,10 @@ def train_with_cifar10():
         metrics=['accuracy']
     )
 
-    augment = keras.preprocessing.image.ImageDataGenerator()
+    data_generator = keras.preprocessing.image.ImageDataGenerator()
 
-    _ = model.fit_generator(augment.flow(x_train, y_train, 256),
-                            validation_data=(x_valid, y_valid), epochs=100)
+    _ = model.fit_generator(multiple_outputs_generator(data_generator, x_train, y_train),
+                            validation_data=multiple_outputs_generator(data_generator, x_valid, y_valid), epochs=100)
 
 
 if __name__ == '__main__':
