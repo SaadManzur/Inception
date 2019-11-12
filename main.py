@@ -106,12 +106,10 @@ def get_cifar10_dataset(width, height):
 
 def multiple_outputs_generator(generator, x, y, batch_size=256):
 
-    generator_x = generator.flow(x, batch_size=batch_size)
-    generator_y = generator.flow(y, batch_size=batch_size)
+    generator_x = generator.flow(x, y, batch_size=batch_size)
 
     while True:
-        x_i = generator_x.next()
-        y_i = generator_y.next()
+        x_i, y_i = generator_x.next()
 
         yield x_i, {'output_1': y_i, 'output_2': y_i, 'output_3': y_i}
 
@@ -130,8 +128,9 @@ def train_with_cifar10():
 
     data_generator = keras.preprocessing.image.ImageDataGenerator()
 
-    _ = model.fit_generator(multiple_outputs_generator(data_generator, x_train, y_train),
-                            validation_data=multiple_outputs_generator(data_generator, x_valid, y_valid), epochs=100)
+    _ = model.fit_generator(multiple_outputs_generator(data_generator, x_train, y_train), steps_per_epoch=50000//256,
+                            validation_data=multiple_outputs_generator(data_generator, x_valid, y_valid),
+                            validation_steps=10000//256, epochs=100)
 
 
 if __name__ == '__main__':
