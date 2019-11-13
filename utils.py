@@ -1,5 +1,6 @@
 from tensorflow.python.client import device_lib
 
+
 def check_tensorflow():
     available_devices = device_lib.list_local_devices()
 

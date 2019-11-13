@@ -1,10 +1,12 @@
 import os
-os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID" 
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
-
 from tensorflow import keras
 import numpy as np
 import cv2 as opencv
+from models.inceptionv1 import InceptionV1
+
+
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 
 def get_inception_block(_input, filter_1x1,
@@ -28,7 +30,6 @@ def get_inception_block(_input, filter_1x1,
 
 
 def get_auxilary_output(_input, name=None):
-
     auxilary = keras.layers.AvgPool2D((5, 5), strides=(3, 3))(_input)
     auxilary = keras.layers.Conv2D(128, (1, 1), padding='same', activation='relu')(auxilary)
     auxilary = keras.layers.Flatten()(auxilary)
@@ -92,7 +93,7 @@ def get_cifar10_dataset(width, height):
     y_valid = keras.utils.to_categorical(y_valid, 10)
 
     print(y_train.shape)
-   
+
     print("Changing types")
     x_train = x_train.astype('float32')
     x_valid = x_valid.astype('float32')
@@ -105,7 +106,6 @@ def get_cifar10_dataset(width, height):
 
 
 def multiple_outputs_generator(generator, x, y, batch_size=256):
-
     generator_x = generator.flow(x, y, batch_size=batch_size)
 
     while True:
@@ -128,10 +128,16 @@ def train_with_cifar10():
 
     data_generator = keras.preprocessing.image.ImageDataGenerator()
 
-    _ = model.fit_generator(multiple_outputs_generator(data_generator, x_train, y_train), steps_per_epoch=50000//256,
+    _ = model.fit_generator(multiple_outputs_generator(data_generator, x_train, y_train), steps_per_epoch=50000 // 256,
                             validation_data=multiple_outputs_generator(data_generator, x_valid, y_valid),
-                            validation_steps=10000//256, epochs=100)
+                            validation_steps=10000 // 256, epochs=100)
 
 
 if __name__ == '__main__':
-    train_with_cifar10()
+    x_train, y_train, x_valid, y_valid = get_cifar10_dataset(224, 224)
+
+    model = InceptionV1([224, 224])
+    model.set_training_data(x_train, y_train, 32, 3)
+    model.set_validation_data(x_valid, y_valid, 256, 3)
+    model.train(100)
+
