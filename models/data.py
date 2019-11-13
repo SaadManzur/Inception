@@ -12,10 +12,11 @@ class Data(object):
         self.number_of_outputs = outputs
 
     def generate(self):
-        self.generator = keras.preprocessing.ImageDataGenerator()
+        self.generator = keras.preprocessing.image.ImageDataGenerator()
+        batches = self.generator.flow(self.x, self.y, batch_size=self.batch_size)
 
         while True:
-            xi, yi = self.generator.flow(self.x, self.y, batch_size=self.batch_size)
+            xi, yi = batches.next()
 
             outputs = {'output': yi}
 

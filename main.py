@@ -137,6 +137,7 @@ if __name__ == '__main__':
     x_train, y_train, x_valid, y_valid = get_cifar10_dataset(224, 224)
 
     model = InceptionV1([224, 224])
+    model.define_model()
     model.set_training_data(x_train, y_train, 32, 3)
     model.set_validation_data(x_valid, y_valid, 256, 3)
     model.train(100)
