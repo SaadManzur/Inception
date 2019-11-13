@@ -111,7 +111,7 @@ def multiple_outputs_generator(generator, x, y, batch_size=256):
     while True:
         x_i, y_i = generator_x.next()
 
-        yield x_i, {'output_1': y_i, 'output_2': y_i, 'output_3': y_i}
+        yield x_i, {'output': y_i, 'auxilary_1': y_i, 'auxilary_2': y_i}
 
 
 def train_with_cifar10():
